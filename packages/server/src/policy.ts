@@ -20,6 +20,23 @@ export const POLICY_TEMPLATES: Record<string, Partial<PolicyConfig>> = {
   trader: { maxPerCallUSDC: 0.5, dailyBudgetUSDC: 10, requireSignedQuote: true, priceTolerance: 0.01 },
   default: { maxPerCallUSDC: 0.01, dailyBudgetUSDC: 0.5, requireSignedQuote: true, priceTolerance: 0 },
   open: { maxPerCallUSDC: 1, dailyBudgetUSDC: 100, requireSignedQuote: false, priceTolerance: Infinity },
+  // Live integration: SAN Foundation (gateway.sanfoundation.com).
+  // SAN serves x402 endpoints but does not yet publish a signed .well-known/x402.json,
+  // so this template runs budget-only protection until they adopt the signed-quote spec.
+  researcher_san: {
+    maxPerCallUSDC: 0.05,
+    dailyBudgetUSDC: 1.0,
+    requireSignedQuote: false,
+    priceTolerance: 0.001,
+    allowedSellerHosts: [
+      "localhost:8801",
+      "localhost:8802",
+      "localhost:8803",
+      "localhost:8804",
+      "localhost:8805",
+      "gateway.sanfoundation.com",
+    ],
+  },
 };
 
 export class PolicyWallet {

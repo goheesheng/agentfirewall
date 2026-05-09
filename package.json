@@ -8,8 +8,13 @@
     "server": "bun run packages/server/src/index.ts",
     "seller": "bun run packages/server/src/mock-seller.ts",
     "demo": "bun run scripts/demo-agent.ts",
+    "demo:san": "bun run scripts/demo-san.ts",
     "dashboard": "cd apps/dashboard && bun run dev",
     "test": "bun test"
+  },
+  "dependencies": {
+    "viem": "^2.21.0",
+    "x402-fetch": "^0.4.0"
   },
   "devDependencies": {
     "typescript": "^5.6.0",

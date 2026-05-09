@@ -48,4 +48,5 @@ export type ProxyEvent = {
   signatureHash?: string;
   quotedPrice?: number;
   livePrice?: number;
+  unsigned?: boolean;
 };

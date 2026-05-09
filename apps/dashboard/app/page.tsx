@@ -14,6 +14,7 @@ type ProxyEvent = {
   signatureHash?: string;
   quotedPrice?: number;
   livePrice?: number;
+  unsigned?: boolean;
 };
 
 type Policy = {
@@ -204,6 +205,19 @@ function FeedRow({ e }: { e: ProxyEvent }) {
           {e.signatureHash ? (
             <span className="sig-tooltip" title={`Ed25519 signature: ${e.signatureHash}`}>
               sig {e.signatureHash}
+            </span>
+          ) : null}
+          {e.unsigned ? (
+            <span
+              className="sig-tooltip"
+              style={{
+                color: "#d29922",
+                borderBottomColor: "#d29922",
+                marginLeft: 8,
+              }}
+              title="Seller does not publish a signed .well-known/x402.json — running with budget controls only."
+            >
+              unsigned · budget-only
             </span>
           ) : null}
         </div>

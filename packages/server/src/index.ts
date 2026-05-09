@@ -121,7 +121,7 @@ app.post("/proxy", async (c) => {
       amountUSDC,
       status: "BLOCK",
       reason: "DISCOVERY_UNAVAILABLE",
-      hint: `Could not fetch http://${sellerHost}/.well-known/x402.json. Policy requires signed quote.`,
+      hint: `${sellerHost} does not publish a signed .well-known/x402.json. Policy requires signed quotes — switch to a 'researcher_*' template to run with budget controls only, or push the seller to adopt the signed-quote spec.`,
     });
   }
 
@@ -157,10 +157,12 @@ app.post("/proxy", async (c) => {
       path,
       amountUSDC,
       status: "ALLOW",
-      reason: "OK",
+      reason: quote ? "OK" : "OK_UNSIGNED",
+      hint: quote ? undefined : `${sellerHost} does not publish a signed quote. Allowed under budget-only policy.`,
       signatureHash: quote ? shortHash(quote.signature) : undefined,
       quotedPrice: quote?.price,
       livePrice: amountUSDC,
+      unsigned: !quote,
     },
     { paymentSigned: true },
   );
@@ -178,6 +180,7 @@ function emit(
     signatureHash?: string;
     quotedPrice?: number;
     livePrice?: number;
+    unsigned?: boolean;
   },
   extra: { paymentSigned?: boolean } = {},
 ) {
@@ -193,6 +196,7 @@ function emit(
     signatureHash: e.signatureHash,
     quotedPrice: e.quotedPrice,
     livePrice: e.livePrice,
+    unsigned: e.unsigned,
   };
   publish(event);
   if (e.status === "BLOCK") {
@@ -216,6 +220,7 @@ function emit(
     path: e.path,
     amountUSDC: e.amountUSDC,
     dailySpentUSDC: policy.dailySpentUSDC,
+    unsigned: !!e.unsigned,
   });
 }
 

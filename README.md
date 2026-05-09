@@ -69,6 +69,31 @@ Today there is no `.well-known/x402.json` signature standard. AgentFirewall ship
 
 PRs welcome → x402-foundation/x402.
 
+## Live integration: SAN Foundation
+
+[SAN](https://docs.sanfoundation.com/) ("Situational Awareness Network") is a real-world x402 seller — agents pay per call in USDC on Base for events, web search, web extract, and reports. AgentFirewall ships with a working integration:
+
+```bash
+bun run server     # firewall on :8800
+bun run dashboard  # dashboard on :3000
+bun run demo:san   # forwards to gateway.sanfoundation.com via x402-fetch
+```
+
+Adding any third-party x402 seller is two lines:
+
+1. Add the host to your policy: `PUT /policy { "patch": { "allowedSellerHosts": [..., "gateway.sanfoundation.com"] } }`
+2. Forward the call upstream from your agent (`x402-fetch` for Base, or any x402 client). The firewall pre-flights the budget; the agent does the signing.
+
+**Honest gap**: SAN does not yet publish a signed `.well-known/x402.json`, so calls run under budget-only protection (`requireSignedQuote: false` in the `researcher_san` template). Quote-binding kicks in once they adopt the signed-quote spec — which is exactly what the PR to x402-foundation/x402 proposes.
+
+To make a **real upstream call** (not just dry-run), set a Base private key:
+
+```bash
+BASE_PRIVATE_KEY=0xyour-funded-base-key bun run demo:san
+```
+
+The dashboard surfaces SAN events with an `unsigned · budget-only` badge so you always see the policy decision in context.
+
 ## Stack
 
 - Bun + Hono + SSE
