@@ -1,0 +1,30 @@
+node_modules/
+.next/
+.bun/
+dist/
+*.log
+.env
+.env.local
+keypair*.json
+test-wallet.json
+
+# screenshots and dev artifacts
+deck-*.png
+dashboard-screenshot.png
+.playwright-mcp/
+
+# idea-phase deep-dive HTML/JSON (not part of the OSS repo)
+idea-shortlist-*.html
+idea-deep-dive-*.html
+agentfirewall-final-*.html
+x402-errors-deepdive-*.html
+*-payload.json
+shortlist-payload.json
+shortlist-v2-payload.json
+deepdive-payload.json
+render.py
+
+# tooling caches
+.superstack/
+.claude/
+.DS_Store

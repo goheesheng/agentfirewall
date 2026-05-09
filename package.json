@@ -1,0 +1,18 @@
+{
+  "name": "agentfirewall",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Spend policy + quote-binding firewall for x402 agents on Solana",
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "server": "bun run packages/server/src/index.ts",
+    "seller": "bun run packages/server/src/mock-seller.ts",
+    "demo": "bun run scripts/demo-agent.ts",
+    "dashboard": "cd apps/dashboard && bun run dev",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/bun": "latest"
+  }
+}

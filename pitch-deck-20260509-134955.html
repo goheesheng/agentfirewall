@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AgentFirewall — Two locks before your agent signs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0A1628;
+    --ink-2:#13243D;
+    --paper:#FAFBFC;
+    --paper-2:#F2F5F9;
+    --rule:#1F3556;
+    --muted:#6B7C93;
+    --accent:#3B82F6;
+    --green:#10B981;
+    --red:#EF4444;
+    --amber:#F59E0B;
+    --violet:#8B5CF6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:"Inter",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+    height:100vh;
+  }
+  .mono{font-family:"JetBrains Mono",monospace;font-feature-settings:"tnum"}
+  .deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  .slide{
+    position:absolute;inset:0;
+    padding:64px 80px;
+    display:flex;flex-direction:column;
+    opacity:0;pointer-events:none;
+    transition:opacity 280ms ease;
+  }
+  .slide.on{opacity:1;pointer-events:auto}
+  .slide.light{background:var(--paper);color:var(--ink)}
+  .slide.light .muted{color:var(--muted)}
+  .slide.dark .muted{color:#94A3B8}
+  .slide-no{
+    position:absolute;top:24px;right:32px;
+    font-family:"JetBrains Mono",monospace;
+    font-size:11px;letter-spacing:.12em;color:var(--muted);
+  }
+  .kicker{
+    font-family:"JetBrains Mono",monospace;
+    text-transform:uppercase;letter-spacing:.18em;
+    font-size:11px;color:var(--accent);
+    margin-bottom:24px;
+  }
+  .slide.dark .kicker{color:#7FB2FF}
+  h1{font-weight:800;letter-spacing:-.03em;line-height:.98}
+  h2{font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h3{font-weight:600;letter-spacing:-.01em;line-height:1.2}
+  p{line-height:1.5}
+  .muted{color:var(--muted)}
+
+  .title h1{font-size:96px;margin-bottom:24px}
+  .title .lockline{display:flex;gap:18px;align-items:baseline;margin-bottom:42px}
+  .title .lockline .lock{font-size:72px}
+  .title .sub{font-size:22px;max-width:780px;color:#CBD5E1;line-height:1.4}
+  .title .footer{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-size:13px}
+  .title .footer .l{color:#94A3B8}
+  .title .footer .r{font-family:"JetBrains Mono",monospace;color:#7FB2FF}
+  .title .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 12px;border:1px solid #1F3556;border-radius:999px;
+    font-family:"JetBrains Mono",monospace;font-size:11px;color:#7FB2FF;
+    margin-bottom:32px;
+  }
+
+  .problem h1{font-size:64px;margin-bottom:48px;max-width:1100px}
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-top:24px}
+  .lock-card{border:1px solid #E2E8F0;border-radius:16px;padding:32px;background:#fff}
+  .lock-card .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:4px 10px;border-radius:6px;background:#FEF3C7;color:#92400E;
+    font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.06em;
+    margin-bottom:14px;
+  }
+  .lock-card h3{font-size:22px;margin-bottom:14px}
+  .lock-card p{font-size:15px;color:#475569}
+  .lock-card .quote{
+    margin-top:18px;padding:14px 16px;border-left:3px solid #EF4444;background:#FEF2F2;
+    font-size:13px;color:#7F1D1D;font-style:italic;border-radius:0 8px 8px 0;
+  }
+  .lock-card .quote .src{display:block;margin-top:6px;font-style:normal;color:#991B1B;font-size:11px;font-family:"JetBrains Mono",monospace}
+
+  .agitate{background:#0A1628}
+  .agitate h1{font-size:64px;margin-bottom:42px;max-width:1100px}
+  .stack{display:grid;grid-template-columns:1.3fr 1fr;gap:32px}
+  .news{border:1px solid #1F3556;border-radius:14px;padding:28px;background:rgba(239,68,68,.06)}
+  .news .label{
+    display:inline-block;padding:3px 8px;border-radius:4px;background:#7F1D1D;color:#FEE2E2;
+    font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;margin-bottom:14px;
+  }
+  .news h3{font-size:24px;margin-bottom:12px;color:#FEE2E2}
+  .news p{font-size:14px;color:#CBD5E1;margin-bottom:10px}
+  .news .src{font-family:"JetBrains Mono",monospace;font-size:11px;color:#7FB2FF}
+  .flaw{border:1px solid #1F3556;border-radius:14px;padding:28px;background:rgba(139,92,246,.07)}
+  .flaw .label{
+    display:inline-block;padding:3px 8px;border-radius:4px;background:#5B21B6;color:#EDE9FE;
+    font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;margin-bottom:14px;
+  }
+  .flaw h3{font-size:18px;margin-bottom:12px;color:#EDE9FE}
+  .flaw p{font-size:13px;color:#CBD5E1;margin-bottom:10px}
+  .flaw blockquote{
+    margin-top:14px;padding:12px;border-left:2px solid #8B5CF6;background:rgba(139,92,246,.1);
+    font-size:12px;color:#DDD6FE;font-style:italic;border-radius:0 6px 6px 0;
+  }
+  .agitate .footnote{
+    margin-top:auto;padding-top:32px;font-family:"JetBrains Mono",monospace;font-size:11px;color:#7FB2FF;
+  }
+
+  .solution h1{font-size:72px;margin-bottom:18px}
+  .solution .one-liner{font-size:22px;color:#475569;max-width:900px;margin-bottom:48px}
+  .twolocks{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .ll{border:1px solid #E2E8F0;border-radius:16px;padding:28px;background:#fff;position:relative;overflow:hidden}
+  .ll::before{content:"";position:absolute;top:0;left:0;width:6px;height:100%;background:var(--accent)}
+  .ll.b::before{background:var(--violet)}
+  .ll .num{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;color:var(--accent);margin-bottom:8px;font-weight:600}
+  .ll.b .num{color:var(--violet)}
+  .ll h3{font-size:22px;margin-bottom:10px}
+  .ll p{font-size:14px;color:#475569;margin-bottom:14px}
+  .ll ul{list-style:none;font-size:13px;color:#334155}
+  .ll li{padding:6px 0;border-top:1px dashed #E2E8F0;display:flex;gap:8px;align-items:flex-start}
+  .ll li:first-child{border-top:0}
+  .ll li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0}
+  .arch{
+    margin-top:32px;padding:18px 22px;background:#0F172A;color:#CBD5E1;border-radius:12px;
+    font-family:"JetBrains Mono",monospace;font-size:13px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .arch .pill{padding:4px 10px;border-radius:6px;border:1px solid #334155;background:#1E293B}
+  .arch .arrow{color:#64748B}
+  .arch .blocked{background:#7F1D1D;border-color:#991B1B;color:#FEE2E2}
+
+  .demo{background:#0A1628}
+  .demo h1{font-size:56px;margin-bottom:14px;color:#fff}
+  .demo .sub{font-size:18px;color:#94A3B8;max-width:900px;margin-bottom:36px}
+  .terminal{
+    background:#020617;border:1px solid #1F3556;border-radius:12px;padding:22px 26px;
+    font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.65;
+    box-shadow:0 8px 40px rgba(0,0,0,.35);
+  }
+  .terminal .head{display:flex;gap:6px;margin-bottom:14px}
+  .terminal .head span{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .terminal .head span:nth-child(1){background:#EF4444}
+  .terminal .head span:nth-child(2){background:#F59E0B}
+  .terminal .head span:nth-child(3){background:#10B981}
+  .terminal .line{display:grid;grid-template-columns:60px 1fr;gap:14px;padding:5px 0}
+  .terminal .badge-allow{color:#10B981}
+  .terminal .badge-block{color:#EF4444;font-weight:600}
+  .terminal .reason{color:#fff;font-weight:600}
+  .terminal .hint{color:#94A3B8;font-size:12px}
+  .terminal .qline{background:rgba(239,68,68,.08);border-radius:6px;padding:6px 8px;margin:4px -8px}
+  .star{
+    margin-top:24px;padding:18px 22px;border:1px solid #1F3556;border-radius:12px;
+    background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(139,92,246,.08));
+    color:#FEE2E2;font-size:14px;
+  }
+  .star strong{color:#fff;font-weight:700}
+
+  .crypto h1{font-size:60px;margin-bottom:42px;max-width:1000px}
+  .crypto .twocol{grid-template-columns:1fr 1fr}
+  .why-card{border:1px solid #E2E8F0;border-radius:14px;padding:28px;background:#fff}
+  .why-card .num{font-family:"JetBrains Mono",monospace;font-size:48px;font-weight:700;color:var(--accent);line-height:1;margin-bottom:10px}
+  .why-card.b .num{color:var(--violet)}
+  .why-card h3{font-size:20px;margin-bottom:12px}
+  .why-card p{font-size:14px;color:#475569;margin-bottom:10px}
+  .why-card .test{margin-top:14px;padding:14px;background:#F8FAFC;border-radius:8px;font-size:12px;color:#334155}
+  .why-card .test b{color:#0A1628}
+  .crypto .closer{margin-top:auto;padding-top:32px;font-size:14px;color:var(--muted);max-width:900px}
+
+  .why-now{background:#0A1628}
+  .why-now h1{font-size:60px;margin-bottom:14px;color:#fff}
+  .why-now .sub{font-size:16px;color:#94A3B8;margin-bottom:36px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:32px}
+  .stat{border:1px solid #1F3556;border-radius:12px;padding:22px;background:rgba(255,255,255,.02)}
+  .stat .v{font-family:"JetBrains Mono",monospace;font-size:36px;font-weight:700;color:#fff;letter-spacing:-.02em}
+  .stat .v.green{color:#34D399}
+  .stat .v.red{color:#FCA5A5}
+  .stat .l{font-size:11px;color:#94A3B8;margin-top:6px;font-family:"JetBrains Mono",monospace;letter-spacing:.06em}
+  .stat .src{font-size:10px;color:#64748B;margin-top:8px;font-family:"JetBrains Mono",monospace}
+  .timeline{display:flex;align-items:flex-start;gap:0;margin-top:18px}
+  .tl{flex:1;padding:18px;border-left:2px solid #1F3556;position:relative}
+  .tl:first-child{border-left:0}
+  .tl::before{content:"";position:absolute;left:-7px;top:18px;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px #0A1628}
+  .tl:first-child::before{left:-1px}
+  .tl .when{font-family:"JetBrains Mono",monospace;font-size:11px;color:#7FB2FF;font-weight:600;margin-bottom:6px}
+  .tl .what{font-size:13px;color:#CBD5E1}
+
+  .compete h1{font-size:56px;margin-bottom:32px}
+  .table{width:100%;border-collapse:collapse;margin-top:18px}
+  .table th{
+    text-align:left;font-family:"JetBrains Mono",monospace;font-size:10px;
+    letter-spacing:.14em;color:var(--muted);font-weight:600;
+    padding:12px 14px;border-bottom:2px solid #E2E8F0;
+  }
+  .table td{padding:14px;border-bottom:1px solid #E2E8F0;font-size:14px}
+  .table .name{font-weight:600;color:#0A1628}
+  .table .yes{color:var(--green);font-weight:600}
+  .table .no{color:var(--red);font-weight:600}
+  .table .partial{color:var(--amber);font-weight:600}
+  .table tr.us{background:#EFF6FF}
+  .table tr.us .name{color:var(--accent)}
+  .compete .closer{
+    margin-top:24px;padding:18px;border:1px dashed #94A3B8;border-radius:10px;
+    font-size:14px;color:#334155;
+  }
+
+  .ask{background:#0A1628}
+  .ask h1{font-size:64px;margin-bottom:14px;color:#fff}
+  .ask .sub{font-size:18px;color:#94A3B8;margin-bottom:36px;max-width:900px}
+  .ask-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:32px}
+  .asks{display:flex;flex-direction:column;gap:14px}
+  .ask-row{
+    border:1px solid #1F3556;border-radius:12px;padding:20px 22px;background:rgba(59,130,246,.06);
+    display:grid;grid-template-columns:50px 1fr;gap:18px;align-items:flex-start;
+  }
+  .ask-row .icon{font-family:"JetBrains Mono",monospace;color:#7FB2FF;font-weight:700;font-size:20px;padding-top:2px}
+  .ask-row h3{color:#fff;font-size:17px;margin-bottom:6px}
+  .ask-row p{font-size:13px;color:#CBD5E1}
+  .reach{border:1px solid #1F3556;border-radius:12px;padding:24px;background:rgba(255,255,255,.02)}
+  .reach h3{color:#fff;font-size:16px;margin-bottom:14px;font-family:"JetBrains Mono",monospace;letter-spacing:.04em}
+  .reach .links{display:flex;flex-direction:column;gap:10px;font-family:"JetBrains Mono",monospace;font-size:13px}
+  .reach .links a{color:#7FB2FF;text-decoration:none;border-bottom:1px dashed #1F3556;padding-bottom:6px}
+  .reach .signed{margin-top:18px;padding-top:18px;border-top:1px solid #1F3556;font-size:11px;color:#64748B;line-height:1.6}
+  .reach .signed b{color:#7FB2FF}
+
+  .nav{
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+    display:flex;gap:8px;align-items:center;z-index:10;
+    background:rgba(10,22,40,.7);backdrop-filter:blur(8px);
+    padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);
+  }
+  .nav button{background:transparent;border:0;color:#94A3B8;cursor:pointer;padding:6px 10px;font-family:"JetBrains Mono",monospace;font-size:12px}
+  .nav button:hover{color:#fff}
+  .dots{display:flex;gap:6px;padding:0 10px}
+  .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer}
+  .dot.on{background:#7FB2FF}
+  .notes{
+    position:fixed;bottom:0;left:0;right:0;
+    max-height:40vh;overflow-y:auto;
+    background:rgba(2,6,23,.97);color:#CBD5E1;
+    padding:24px 80px;
+    border-top:2px solid var(--accent);
+    transform:translateY(100%);transition:transform 240ms ease;
+    z-index:20;
+  }
+  .notes.on{transform:translateY(0)}
+  .notes h4{color:#7FB2FF;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.14em;margin-bottom:10px;text-transform:uppercase}
+  .notes p{font-size:13px;margin-bottom:8px}
+  .notes b{color:#fff}
+  .help{position:fixed;top:18px;left:24px;font-family:"JetBrains Mono",monospace;font-size:11px;color:rgba(255,255,255,.4);z-index:9}
+
+  .speaker-block{display:none}
+  body.print-notes .speaker-block{display:block}
+
+  @media print{
+    body{background:#fff;overflow:visible;height:auto}
+    .slide{position:relative;opacity:1!important;page-break-after:always;height:100vh;inset:auto}
+    .nav,.notes,.help{display:none!important}
+    .speaker-block{display:block;background:#F1F5F9;color:#0A1628;padding:14px 18px;border-top:2px dashed #94A3B8;margin-top:auto;font-size:11px}
+    .speaker-block h4{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;color:#475569;margin-bottom:6px}
+  }
+</style>
+</head>
+<body>
+
+<div class="help">← → arrows · N for notes · F for fullscreen · P for print</div>
+
+<div class="deck">
+
+<section class="slide on dark title" data-notes="title">
+  <span class="slide-no mono">01 / 09</span>
+  <span class="badge mono">🔒 Cypherpunk Track · Colosseum</span>
+  <div class="lockline"><span class="lock">🔒</span><span class="lock">🔒</span></div>
+  <h1>Two locks before<br/>your agent signs.</h1>
+  <p class="sub" style="margin-top:32px">AgentFirewall is an HTTP proxy + dashboard that wraps your agent's Solana wallet and enforces <b style="color:#fff">spend policy</b> and <b style="color:#fff">quote-binding</b> before any x402 payment leaves the keypair.</p>
+  <div class="footer">
+    <span class="l">May 2026 · v0.1 · Solana devnet</span>
+    <span class="r">github.com/agentfirewall</span>
+  </div>
+</section>
+
+<section class="slide light problem" data-notes="problem">
+  <span class="slide-no mono">02 / 09</span>
+  <div class="kicker">Problem</div>
+  <h1>An agent's keypair signs<br/>whatever it's asked to.</h1>
+  <p class="muted" style="font-size:18px;margin-top:24px;max-width:900px">x402 turned every HTTP endpoint into a payable surface. Agents now sign stablecoin payments at the speed of API calls — with no spending limits and no way to verify the price the seller actually committed to.</p>
+
+  <div class="twocol">
+    <div class="lock-card">
+      <span class="badge">FAILURE MODE 1</span>
+      <h3>Wallets have no spending controls.</h3>
+      <p>Per-call cap, daily budget, allow-listed sellers — none of it exists at the keypair layer. One bad prompt drains the wallet.</p>
+      <div class="quote">"my x402 wallet just autopaid for a vpn subscription i forgot i even had. it didn't flinch."<span class="src">— @ClankerOnChain · May 7, 2026</span></div>
+    </div>
+    <div class="lock-card">
+      <span class="badge">FAILURE MODE 2</span>
+      <h3>Sellers can lie about prices.</h3>
+      <p>The seller alone fills <code class="mono">PaymentRequirements.amount</code>. Discovery says $0.01; live 402 charges $1.00. The agent just signs.</p>
+      <div class="quote">"PaymentRequirements.amount is set unilaterally by the seller… A malicious endpoint can publish $0.01 in the Bazaar and charge $1.00 in the live 402."<span class="src">— x402 architectural critique, Layer 1 #5</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide dark agitate" data-notes="agitate">
+  <span class="slide-no mono">03 / 09</span>
+  <div class="kicker">It's already happening.</div>
+  <h1>$200,000 drained.<br/>Two weeks ago.</h1>
+
+  <div class="stack">
+    <div class="news">
+      <span class="label">⚠ MAY 2026 · GROK + BANKRBOT</span>
+      <h3>Prompt-injected AI agent transferred 3B tokens to attacker.</h3>
+      <p>An attacker hid Morse-encoded instructions in an X post. The wallet-enabled agent obeyed and signed a $150K–$200K transfer on Base. No spending limit, no allow-list, no policy boundary stopped it.</p>
+      <p class="src">Sources: AMBCrypto · AINvest · OECD.AI incident DB</p>
+    </div>
+    <div class="flaw">
+      <span class="label">PROTOCOL SEAM</span>
+      <h3>Quote-mismatch is unfixed in the spec.</h3>
+      <p>x402 has no buyer-side quote verification. No signed pricing oracle. An autonomous agent on auto-approve will sign whatever amount the seller returns.</p>
+      <blockquote>"Can the agent verify the provider, expected price, health, idempotency before it spends? That pre-payment contract will matter as much as the rail." — QBT Labs, May 8</blockquote>
+    </div>
+  </div>
+
+  <div class="footnote">As x402 scales — 35M tx on Solana, $600M annualized, ~$7B ecosystem valuation — the blast radius grows with it.</div>
+</section>
+
+<section class="slide light solution" data-notes="solution">
+  <span class="slide-no mono">04 / 09</span>
+  <div class="kicker">Solution</div>
+  <h1>AgentFirewall.</h1>
+  <p class="one-liner">An in-process proxy that holds your agent's signing key and runs <b>two checks</b> on every payment. Both must pass, or nothing signs.</p>
+
+  <div class="twolocks">
+    <div class="ll">
+      <div class="num">LOCK 01</div>
+      <h3>Spend Policy</h3>
+      <p>Per-call cap · daily budget · allowed-seller hosts · 5 named templates (paranoid → open).</p>
+      <ul>
+        <li>Stops drain attacks like Grok / Bankrbot</li>
+        <li>Stops forgotten-subscription autopay</li>
+        <li>Stops out-of-allowlist payments</li>
+        <li>Daily budget rolls over at UTC midnight</li>
+      </ul>
+    </div>
+    <div class="ll b">
+      <div class="num">LOCK 02</div>
+      <h3>Quote-Binding (Ed25519)</h3>
+      <p>Fetches seller's signed <code class="mono">.well-known/x402.json</code>, verifies signature with seller pubkey, compares discovery price to live 402 price.</p>
+      <ul>
+        <li>Closes Layer 1 #5 quote-mismatch attack</li>
+        <li>60s discovery cache, configurable tolerance</li>
+        <li>Multi-facilitator — verifies any seller signature</li>
+        <li>Ships first draft of the signed-quote spec</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="arch">
+    <span class="pill">agent</span><span class="arrow">→</span>
+    <span class="pill" style="border-color:#3B82F6;background:#1E3A8A;color:#fff">AgentFirewall</span><span class="arrow">→</span>
+    <span class="pill">budget?</span><span class="arrow">→</span>
+    <span class="pill">discovery?</span><span class="arrow">→</span>
+    <span class="pill">sig verify?</span><span class="arrow">→</span>
+    <span class="pill">price match?</span><span class="arrow">→</span>
+    <span class="pill" style="border-color:#10B981;background:#064E3B;color:#fff">sign &amp; pay</span><span class="arrow">·or·</span>
+    <span class="pill blocked">HTTP 451</span>
+  </div>
+</section>
+
+<section class="slide dark demo" data-notes="demo">
+  <span class="slide-no mono">05 / 09</span>
+  <div class="kicker">Live demo · localhost</div>
+  <h1>Five calls. Three blocks.<br/>One QUOTE_LIE caught.</h1>
+  <p class="sub">Demo agent calls 5 sellers via the firewall. Two pass. Three are blocked at the keypair, before any signature is produced. The signed-quote check is the centerpiece.</p>
+
+  <div class="terminal">
+    <div class="head"><span></span><span></span><span></span></div>
+    <div class="line"><span class="badge-allow">✓ ALLOW</span><span><span class="reason">data-seller-a</span> · $0.0050 · sig <span class="muted">32vcQJVH…A1nRKi</span> verified</span></div>
+    <div class="line"><span class="badge-allow">✓ ALLOW</span><span><span class="reason">data-seller-b</span> · $0.0080 · sig <span class="muted">52dfaJ2z…MxdZ1t</span> verified</span></div>
+    <div class="line"><span class="badge-block">✗ BLOCK</span><span><span class="reason">BUDGET_EXCEEDED</span><div class="hint">Per-call cap is $0.0100 USDC, requested $0.0500.</div></span></div>
+    <div class="line"><span class="badge-block">✗ BLOCK</span><span><span class="reason">UNKNOWN_SELLER</span><div class="hint">Host evil.example.com not in allowedSellerHosts.</div></span></div>
+    <div class="line qline"><span class="badge-block">✗ BLOCK</span><span><span class="reason" style="color:#FCA5A5">QUOTE_LIE</span><div class="hint">Seller's signed discovery price $0.0100 ≠ live 402 price $1.0000. <b style="color:#FECACA">Signature verified, mismatch detected.</b></div></span></div>
+  </div>
+
+  <div class="star">
+    <strong>The QUOTE_LIE moment:</strong> the malicious seller signed $0.01 with a real Ed25519 key in their <code class="mono">.well-known/x402.json</code>, then quoted $1.00 live. The signature proves the lie. Without quote-binding, a single agent call burns 100× the expected amount.
+  </div>
+</section>
+
+<section class="slide light crypto" data-notes="crypto">
+  <span class="slide-no mono">06 / 09</span>
+  <div class="kicker">Why crypto · why this can't be Web2</div>
+  <h1>Pull out the keypair —<br/>both locks break.</h1>
+
+  <div class="twocol">
+    <div class="why-card">
+      <div class="num">01</div>
+      <h3>Wallet IS the policy boundary.</h3>
+      <p>Only an in-process proxy holding the signing key can refuse to sign. No SaaS layer upstream of the wallet can do this — the agent could just bypass it and sign directly.</p>
+      <div class="test"><b>The test:</b> remove the keypair → there's no boundary to enforce, the proxy becomes advisory. Stripe Issuing solves spending limits for human cardholders only — the agent has no card.</div>
+    </div>
+    <div class="why-card b">
+      <div class="num">02</div>
+      <h3>Quote honesty needs a signature.</h3>
+      <p>Across permissionless x402 endpoints, no centralized trust layer can enforce that a seller charges what they advertised. Only Ed25519 verification of a seller-attested price closes the gap.</p>
+      <div class="test"><b>The test:</b> remove the signature and the discovery doc is just a JSON suggestion. Web2 has no protocol-level concept of a price commitment over HTTP.</div>
+    </div>
+  </div>
+
+  <p class="closer">Both guards are cryptographic. Neither has a Web2 analogue that works for non-KYC, headless, autonomous agents on a permissionless rail.</p>
+</section>
+
+<section class="slide dark why-now" data-notes="why-now">
+  <span class="slide-no mono">07 / 09</span>
+  <div class="kicker">Why now</div>
+  <h1>The rails just got real.<br/>The brakes haven't shipped.</h1>
+  <p class="sub">x402 went from launch to $7B-valued ecosystem in nine months. The infrastructure to drain it is ahead of the infrastructure to protect it.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v">35M</div><div class="l">x402 tx on Solana · Mar 2026</div><div class="src">— Solana Foundation</div></div>
+    <div class="stat"><div class="v green">$600M</div><div class="l">annualized x402 volume</div><div class="src">— BlockEden</div></div>
+    <div class="stat"><div class="v">~$7B</div><div class="l">x402 ecosystem valuation</div><div class="src">— CoinDesk · Mar 2026</div></div>
+    <div class="stat"><div class="v red">$200K</div><div class="l">drained · Grok+Bankrbot</div><div class="src">— OECD.AI · May 2026</div></div>
+  </div>
+
+  <div class="timeline">
+    <div class="tl"><div class="when">Sep 2025</div><div class="what">x402 Foundation launches with Coinbase + Cloudflare.</div></div>
+    <div class="tl"><div class="when">Mar 2026</div><div class="what">35M Solana tx · 119M Base tx · CoinDesk: "demand isn't there yet."</div></div>
+    <div class="tl"><div class="when">May 2026</div><div class="what">AWS Bedrock AgentCore Payments + Solana × Google Cloud Pay.sh ship native agent payments.</div></div>
+    <div class="tl"><div class="when">May 8 2026</div><div class="what">Builders openly request "policy enforcement before the rail." Nobody has shipped it.</div></div>
+  </div>
+</section>
+
+<section class="slide light compete" data-notes="competition">
+  <span class="slide-no mono">08 / 09</span>
+  <div class="kicker">Competition</div>
+  <h1>Single-facilitator products<br/>can't enforce honesty.</h1>
+
+  <table class="table">
+    <thead><tr>
+      <th>Player</th><th>Spend policy</th><th>Quote-binding</th><th>Multi-facilitator</th><th>Solana</th><th>Open spec</th>
+    </tr></thead>
+    <tbody>
+      <tr class="us">
+        <td class="name">AgentFirewall</td>
+        <td class="yes">✓ 5 templates</td>
+        <td class="yes">✓ Ed25519</td>
+        <td class="yes">✓</td>
+        <td class="yes">✓</td>
+        <td class="yes">✓ draft published</td>
+      </tr>
+      <tr>
+        <td class="name">Coinbase CDP</td>
+        <td class="partial">~ delegated signing</td>
+        <td class="no">✗</td>
+        <td class="no">✗ CDP-locked</td>
+        <td class="yes">✓</td>
+        <td class="no">✗</td>
+      </tr>
+      <tr>
+        <td class="name">AWS Bedrock AgentCore</td>
+        <td class="yes">✓ policy controls</td>
+        <td class="no">✗</td>
+        <td class="no">✗ AWS-locked</td>
+        <td class="partial">~ via CDP</td>
+        <td class="no">✗</td>
+      </tr>
+      <tr>
+        <td class="name">AgentPays.app</td>
+        <td class="yes">✓ Sui-native</td>
+        <td class="no">✗</td>
+        <td class="no">✗ Sui-only</td>
+        <td class="no">✗</td>
+        <td class="no">✗</td>
+      </tr>
+      <tr>
+        <td class="name">256Blocks (Stu Wilson)</td>
+        <td class="partial">~ planned</td>
+        <td class="no">✗</td>
+        <td class="partial">~</td>
+        <td class="yes">✓</td>
+        <td class="no">✗</td>
+      </tr>
+      <tr>
+        <td class="name">x402-error-handler</td>
+        <td class="no">✗ library only</td>
+        <td class="no">✗</td>
+        <td class="no">✗ single facilitator</td>
+        <td class="partial">~</td>
+        <td class="no">✗</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="closer">As facilitators proliferate, the policy layer must live on the agent side, not the facilitator side. <b>AgentFirewall is the only multi-facilitator, signature-verifying, open-spec play.</b></div>
+</section>
+
+<section class="slide dark ask" data-notes="ask">
+  <span class="slide-no mono">09 / 09</span>
+  <div class="kicker">Ask</div>
+  <h1>Help us land the brakes<br/>before the next drain.</h1>
+  <p class="sub">v0.1 ships today on Solana devnet. We want a Cypherpunk track win, the first 10 integrators, and a draft signed-quote spec accepted by the x402 Foundation.</p>
+
+  <div class="ask-grid">
+    <div class="asks">
+      <div class="ask-row">
+        <span class="icon">01</span>
+        <div><h3>Win Cypherpunk @ Colosseum</h3><p>Cryptographic primitive (Ed25519 quote-binding) + working system + multi-facilitator open spec — the criteria the track is scored on.</p></div>
+      </div>
+      <div class="ask-row">
+        <span class="icon">02</span>
+        <div><h3>10 design partners in 14 days</h3><p>Stu Wilson (256Blocks), Subly, Wayforth, occaai, EarnFi, QBT Labs, Hashlock Markets, AgentPays.app, Agentchain_AI, Tejas Kumar.</p></div>
+      </div>
+      <div class="ask-row">
+        <span class="icon">03</span>
+        <div><h3>Spec PR to x402-foundation/x402</h3><p>Propose <code class="mono">.well-known/x402.json</code> signed-quote extension. Reference AgentFirewall as the reference implementation.</p></div>
+      </div>
+      <div class="ask-row">
+        <span class="icon">04</span>
+        <div><h3>Solana Foundation grant track</h3><p>Open-source infra play — security tooling for the agent commerce layer Solana × Google Cloud just announced.</p></div>
+      </div>
+    </div>
+
+    <div class="reach">
+      <h3>// REACH OUT</h3>
+      <div class="links">
+        <a href="#">github.com/agentfirewall</a>
+        <a href="#">agentic.market/agentfirewall</a>
+        <a href="#">@agentfirewall on X</a>
+        <a href="#">demo · 60s split-screen video</a>
+      </div>
+      <div class="signed">
+        Built in 4 hours.<br/>
+        Bun + Hono + Next.js. No Anchor. No TEE.<br/>
+        Pure TS + Ed25519. Multi-facilitator.<br/><br/>
+        <b>// Two locks before your agent signs.</b>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="nav">
+  <button id="prev">◀ prev</button>
+  <div class="dots" id="dots"></div>
+  <button id="next">next ▶</button>
+</div>
+
+<div class="notes" id="notes" hidden>
+  <h4>Speaker Notes</h4>
+  <div id="notes-body"></div>
+</div>
+
+<template id="notes-template-title">
+  <p><b>Open with confidence.</b> "AgentFirewall — two locks before your agent signs." Then pause for 2 seconds. Let the metaphor land.</p>
+  <p>Don't say "Hi I'm…" — that's slide 9. Hook first.</p>
+</template>
+<template id="notes-template-problem">
+  <p><b>Read the two failure modes verbatim.</b> Quote @ClankerOnChain in their voice — the lowercase casual matters. The Layer 1 #5 quote is the technical setup for slide 3.</p>
+  <p><b>Don't soften.</b> "Wallets have no spending controls" — say it flat.</p>
+</template>
+<template id="notes-template-agitate">
+  <p><b>This is the slide that wakes them up.</b> Slow down. Read the headline: "$200,000 drained, two weeks ago." Then point to the story.</p>
+  <p>If asked: yes, Bankrbot/Grok was on Base, not Solana — the same agent + wallet pattern is now shipping on Solana via Pay.sh. The blast radius is moving.</p>
+</template>
+<template id="notes-template-solution">
+  <p><b>One sentence:</b> "AgentFirewall is an in-process proxy that holds the signing key and runs two checks on every payment." Then walk the diagram.</p>
+  <p>Emphasize "in-process." That's why a SaaS competitor can't do this.</p>
+</template>
+<template id="notes-template-demo">
+  <p><b>This is the centerpiece.</b> If you have screen-share, switch to it. Run <code>bun run demo</code> live. The QUOTE_LIE row should pulse red on the dashboard.</p>
+  <p>If no live demo: read the terminal output line by line, then say: "The malicious seller signed $0.01 in their discovery doc with a real Ed25519 key — but quoted $1.00 live. The signature proves the lie."</p>
+</template>
+<template id="notes-template-crypto">
+  <p><b>Anticipate the "why blockchain" challenge.</b> Both tests are designed to answer it pre-emptively.</p>
+  <p>The Stripe Issuing line is the strongest comparison: it solves spend limits — for human cardholders. Agents don't have cards, KYC, or chargebacks. The keypair is the only boundary.</p>
+</template>
+<template id="notes-template-why-now">
+  <p><b>The numbers do the work.</b> 35M / $600M / $7B / $200K — read them in that order. The drama is in the last one.</p>
+  <p>The timeline shows the asymmetry: rails shipped in Sep 2025, brakes haven't.</p>
+</template>
+<template id="notes-template-competition">
+  <p><b>Don't disparage.</b> CDP and Bedrock are real products — they're just single-facilitator and don't address quote-mismatch.</p>
+  <p>The killer line: "as facilitators proliferate, the policy layer must live on the agent side." That's the bet.</p>
+</template>
+<template id="notes-template-ask">
+  <p><b>Be specific.</b> Track win, 10 named integrators, spec PR, grant. Not "we want to grow."</p>
+  <p>End with: "Two locks before your agent signs. Try it on devnet today." Then stop talking.</p>
+</template>
+
+<script>
+  (function(){
+    var slides = document.querySelectorAll('.slide');
+    var dotsEl = document.getElementById('dots');
+    var notesBody = document.getElementById('notes-body');
+    var notesEl = document.getElementById('notes');
+    var cur = 0;
+    var dots = [];
+    for (var i = 0; i < slides.length; i++) {
+      var d = document.createElement('div');
+      d.className = 'dot' + (i === 0 ? ' on' : '');
+      (function(idx){ d.addEventListener('click', function(){ show(idx); }); })(i);
+      dotsEl.appendChild(d);
+      dots.push(d);
+    }
+    function show(i){
+      cur = ((i % slides.length) + slides.length) % slides.length;
+      for (var j = 0; j < slides.length; j++) slides[j].classList.toggle('on', j === cur);
+      for (var k = 0; k < dots.length; k++) dots[k].classList.toggle('on', k === cur);
+      var key = slides[cur].getAttribute('data-notes');
+      var tpl = document.getElementById('notes-template-' + key);
+      while (notesBody.firstChild) notesBody.removeChild(notesBody.firstChild);
+      if (tpl) notesBody.appendChild(tpl.content.cloneNode(true));
+    }
+    document.getElementById('next').addEventListener('click', function(){ show(cur+1); });
+    document.getElementById('prev').addEventListener('click', function(){ show(cur-1); });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight' || e.key === ' ') show(cur+1);
+      else if (e.key === 'ArrowLeft') show(cur-1);
+      else if (e.key.toLowerCase() === 'n') { notesEl.hidden = !notesEl.hidden; notesEl.classList.toggle('on', !notesEl.hidden); }
+      else if (e.key.toLowerCase() === 'p') window.print();
+      else if (e.key.toLowerCase() === 'f') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+      }
+    });
+    show(0);
+  })();
+</script>
+</body>
+</html>
