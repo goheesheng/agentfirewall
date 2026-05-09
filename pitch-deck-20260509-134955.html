@@ -283,10 +283,37 @@
   .team .bullets li:first-child{border-top:0}
   .team .bullets li::before{content:"→";color:var(--accent);font-weight:700;flex-shrink:0}
   .team .why{
-    margin-top:24px;padding:14px 18px;background:#FEF3C7;border-left:3px solid var(--accent);
-    border-radius:0 8px 8px 0;font-size:14px;color:var(--ink);max-width:700px;
+    margin-top:20px;padding:14px 18px;background:#FEF3C7;border-left:3px solid var(--accent);
+    border-radius:0 8px 8px 0;font-size:13px;color:var(--ink);max-width:760px;line-height:1.5;
   }
   .team .why b{color:var(--accent-deep)}
+
+  .proj-list{display:flex;flex-direction:column;gap:10px;max-width:760px}
+  .proj{
+    border:1px solid var(--rule);border-left:3px solid var(--accent);
+    border-radius:0 10px 10px 0;padding:12px 16px;background:#fff;
+  }
+  .proj-head{
+    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px;
+  }
+  .proj-name{font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.005em}
+  .proj-sub{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);letter-spacing:.04em}
+  .proj-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  .tag-stat{
+    padding:3px 9px;border-radius:6px;background:rgba(242,101,34,.1);color:var(--accent-deep);
+    font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.02em;
+  }
+  .proj-quote{
+    margin-top:8px;font-size:12px;color:var(--ink);font-style:italic;
+  }
+  .proj-quote a{color:var(--accent);text-decoration:none;font-style:normal;font-weight:600;border-bottom:1px dashed var(--accent)}
+  .proj-desc{font-size:13px;color:var(--ink);margin-top:2px}
+  .proj-link{margin-top:6px;font-family:"JetBrains Mono",monospace;font-size:11px}
+  .proj-link a{color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent)}
+  .stack-line{
+    margin-top:14px;font-family:"JetBrains Mono",monospace;font-size:11px;
+    color:var(--muted);max-width:760px;line-height:1.5;
+  }
 
   /* === 10 ASK === */
   .ask{background:var(--ink);color:#fff}
@@ -630,12 +657,37 @@
       <div class="name">goheesheng</div>
       <div class="role">Solo founder · @base SG DevRel ambassador · NTU</div>
       <p class="bio">Product builder at the intersection of Web3, security, and UX. AgentFirewall is the third agent-payments project I've shipped in 2026 — each one tackles a different failure mode in the same emerging stack: identity, privacy, and now spend control.</p>
-      <ul class="bullets">
-        <li><b>x402guard</b> — <b>#1 agent on aGDP.io Epoch 1</b> ($90.5K rev · $67.2K reward) · <b>#2 Epoch 2</b> as x402guard_pentester ($66.6K rev) · ~$200K USDC accumulated on Virtuals in 48 hours · <a href="https://x.com/virtuals_io/status/2020470737258344687?s=20" style="color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent)">@virtuals_io</a> called it "your first @openclaw agent"</li>
-        <li><b>zx402</b> (formerly zBase) — first compliant ZK privacy layer for x402 payments + Morpho yield on Base · Groth16 zk-proofs · <a href="https://github.com/goheesheng/zx402" style="color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent)">github.com/goheesheng/zx402</a></li>
-        <li><b>moonstack.fun</b> — binary-options trading app with Tinder swipe UI · live on Base · <a href="https://x.com/moonstackdotfun" style="color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent)">@moonstackdotfun</a></li>
-        <li>Full-stack TS + Solidity + ZK: Bun, Hono, Next.js, web3.js, tweetnacl, Groth16/snarkjs, RainbowKit</li>
-      </ul>
+      <div class="proj-list">
+        <div class="proj">
+          <div class="proj-head">
+            <span class="proj-name">x402guard</span>
+            <span class="proj-sub">x402-security agent · Virtuals Protocol</span>
+          </div>
+          <div class="proj-tags">
+            <span class="tag-stat">#1 · aGDP Epoch 1 · $90.5K</span>
+            <span class="tag-stat">#2 · Epoch 2 · $66.6K</span>
+            <span class="tag-stat">~$200K accumulated · 48hrs</span>
+          </div>
+          <div class="proj-quote"><a href="https://x.com/virtuals_io/status/2020470737258344687?s=20">@virtuals_io</a> called it "your first @openclaw agent builder"</div>
+        </div>
+        <div class="proj">
+          <div class="proj-head">
+            <span class="proj-name">zx402</span>
+            <span class="proj-sub">formerly zBase · Base Sepolia</span>
+          </div>
+          <div class="proj-desc">First compliant ZK privacy layer for x402 payments + Morpho yield. Groth16 zk-proofs.</div>
+          <div class="proj-link"><a href="https://github.com/goheesheng/zx402">github.com/goheesheng/zx402</a></div>
+        </div>
+        <div class="proj">
+          <div class="proj-head">
+            <span class="proj-name">moonstack.fun</span>
+            <span class="proj-sub">consumer Web3 · Base</span>
+          </div>
+          <div class="proj-desc">Binary-options trading app with a Tinder-style swipe UI.</div>
+          <div class="proj-link"><a href="https://x.com/moonstackdotfun">@moonstackdotfun</a></div>
+        </div>
+      </div>
+      <p class="stack-line">Full-stack TS + Solidity + ZK · Bun, Hono, Next.js, web3.js, tweetnacl, Groth16/snarkjs, RainbowKit.</p>
       <div class="why"><b>Founder-problem fit:</b> I shipped <b>x402guard</b> (the agent · $200K accumulated in 48hrs on Virtuals), <b>zx402</b> (the privacy layer), and <b>moonstack.fun</b> (a consumer Web3 product). AgentFirewall is the productized infra version of the security wedge x402guard validated. I've been here. The public market already priced two of these.</div>
     </div>
   </div>
