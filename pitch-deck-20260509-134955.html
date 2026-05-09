@@ -301,9 +301,17 @@
   .slide.dark ~ .help{color:rgba(255,255,255,.5)}
 
   @media print{
-    body{background:#fff;overflow:visible;height:auto}
-    .slide{position:relative;opacity:1!important;page-break-after:always;height:100vh;inset:auto}
+    @page { size: 1280px 800px; margin: 0; }
+    html,body{background:#fff;overflow:visible;height:auto;width:auto}
+    .deck{position:static;display:block;inset:auto;width:auto;height:auto}
+    .slide{
+      position:relative;opacity:1!important;display:flex!important;
+      pointer-events:auto!important;page-break-after:always;break-after:page;
+      width:1280px;height:800px;inset:auto;padding:48px 60px;
+    }
+    .slide:last-child{page-break-after:auto;break-after:auto}
     .nav,.notes,.help{display:none!important}
+    .slide-no,.yc-stamp{position:absolute}
   }
 </style>
 </head>
@@ -465,30 +473,25 @@
   <span class="yc-stamp mono">Traction</span>
   <span class="slide-no mono">07 / 10</span>
   <div class="kicker">07 · Traction</div>
-  <h1>v0.1 ships today.<br/>Pipeline already built.</h1>
-  <p class="sub">We're at the start of the curve — <b>day zero of public launch</b>. The honest numbers are below; the named pipeline is the leading indicator. We don't pad the deck with vanity metrics.</p>
+  <h1>$157K agent revenue,<br/>two weeks running.</h1>
+  <p class="sub">My prior project <b>x402guard</b> is live on the aGDP.io leaderboard and ranked <b>#1 in Epoch 1</b> and <b>#2 in Epoch 2</b> by agent revenue — same x402-security wedge AgentFirewall productizes. AgentFirewall is the next layer on a stack already earning real money.</p>
 
   <div class="tg">
-    <div class="tcard"><div class="v">4hrs</div><div class="l">Idea → working MVP</div><div class="d">Bun + Hono + Next.js. Devnet. End-to-end demo verified.</div></div>
-    <div class="tcard"><div class="v">5/5</div><div class="l">Demo block reasons fire correctly</div><div class="d">BUDGET, DAILY_BUDGET, UNKNOWN_SELLER, QUOTE_LIE, SIGNATURE_INVALID.</div></div>
-    <div class="tcard"><div class="v">10</div><div class="l">Named design partners contacted</div><div class="d">Builders quoted in May 2026 X threads about exact pain we solve.</div></div>
+    <div class="tcard"><div class="v">$90.5K</div><div class="l">x402guard · Epoch 1 revenue</div><div class="d"><b>#1 ranked agent</b> · 11–23 Feb 2026 · $67.2K total reward</div></div>
+    <div class="tcard"><div class="v">$66.6K</div><div class="l">x402guard_pentester · Epoch 2</div><div class="d"><b>#2 ranked agent</b> · 23 Feb–2 Mar 2026 · $27.3K reward</div></div>
+    <div class="tcard"><div class="v">$184K</div><div class="l">moonstack.fun accumulated</div><div class="d">Founder Trading Tax + Released ACF + LP — Virtuals Protocol launch</div></div>
   </div>
 
   <div class="honest">
-    <b>Where we stand honestly:</b> 0 paying users · 0 revenue · 0 mainnet integrations. What we have: a working demo, a credible spec proposal, and a launch list of builders who've publicly asked for this exact thing. <b>This is YC week 0, not week 12.</b>
+    <b>The signal:</b> when this builder ships an agent in this exact wedge, it ranks top-2 on the public leaderboard within two epochs. AgentFirewall is v0.1 today on devnet — but this is not week zero from a builder track record. <b>x402guard proved demand. AgentFirewall productizes the policy layer.</b>
   </div>
 
   <div class="pipe">
-    <span class="chip">Stu Wilson · 256Blocks</span>
-    <span class="chip">Subly</span>
-    <span class="chip">Wayforth</span>
-    <span class="chip">occaai</span>
-    <span class="chip">EarnFi</span>
-    <span class="chip">QBT Labs</span>
-    <span class="chip">Hashlock Markets</span>
-    <span class="chip">AgentPays.app</span>
-    <span class="chip">Agentchain_AI</span>
-    <span class="chip">Tejas Kumar</span>
+    <span class="chip">aGDP.io · Epoch 1 · #1</span>
+    <span class="chip">aGDP.io · Epoch 2 · #2</span>
+    <span class="chip">moonstack.fun · live on Virtuals</span>
+    <span class="chip">zx402 · @virtuals_io feature</span>
+    <span class="chip">10 named design partners queued</span>
   </div>
 </section>
 
@@ -551,18 +554,18 @@
   <h1>Why us.</h1>
 
   <div class="grid">
-    <div class="avatar">EE</div>
+    <div class="avatar">GH</div>
     <div>
-      <div class="name">Ee Sheng</div>
-      <div class="role">Solo founder · full-stack TS · Solana</div>
-      <p class="bio">Vibe coder turned shipper. Built and shipped the AgentFirewall MVP — server, dashboard, demo, and signed-quote spec — in a single 4-hour session during the Colosseum Cypherpunk window.</p>
+      <div class="name">goheesheng</div>
+      <div class="role">Solo founder · @base SG DevRel ambassador · NTU</div>
+      <p class="bio">Product builder at the intersection of Web3, security, and UX. AgentFirewall is the third agent-payments project I've shipped in 2026 — each one tackles a different failure mode in the same emerging stack: identity, privacy, and now spend control.</p>
       <ul class="bullets">
-        <li>Full-stack TypeScript: Bun, Hono, Next.js, web3.js, tweetnacl</li>
-        <li>Lived the problem: shipped agents that paid over x402 and watched the wallet drain pattern firsthand</li>
-        <li>Researched 200+ x402 builders' pain via May 2026 X scrape — synthesized 6 named user quotes into the design</li>
-        <li>Comfort with the public arena: pitch deck, repo, spec proposal — all shipped same-day</li>
+        <li><b>x402guard</b> — <b>#1 agent on aGDP.io Epoch 1</b> ($90.5K rev) · <b>#2 Epoch 2</b> as x402guard_pentester ($66.6K rev) — same x402-security wedge AgentFirewall productizes</li>
+        <li><b>zx402</b> (formerly zBase) — first compliant ZK privacy layer for x402 payments + Morpho yield on Base · featured by <a href="https://x.com/virtuals_io/status/2020470737258344687?s=20" style="color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent)">@virtuals_io</a> · <a href="https://github.com/goheesheng/zx402" style="color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent)">github.com/goheesheng/zx402</a></li>
+        <li><b>moonstack.fun</b> — Virtuals Protocol launch · <b>$183K accumulated</b> (CBBTC + USDC + VIRTUAL)</li>
+        <li>Full-stack TS + Solidity + ZK: Bun, Hono, Next.js, web3.js, tweetnacl, Groth16/snarkjs, RainbowKit</li>
       </ul>
-      <div class="why"><b>Founder-problem fit:</b> I gave my own agent a Solana wallet, watched it autopay things I never approved, and got mad enough to spend the same Saturday building the thing that would have stopped it. The deck and the working demo are the proof I'll keep shipping.</div>
+      <div class="why"><b>Founder-problem fit:</b> I've shipped privacy (zx402), an agent that earned <b>$157K across two epochs</b> on the same x402-security wedge (x402guard), and now the productized policy layer (AgentFirewall). Same problem, three vectors. I'm not pivoting onto this — I've been here, and the public market has already priced in two of them.</div>
     </div>
   </div>
 </section>
@@ -573,7 +576,7 @@
   <span class="slide-no mono">10 / 10</span>
   <div class="kicker">10 · Ask</div>
   <h1>$250K SAFE,<br/>$5M post-money cap.</h1>
-  <p class="sub"><b>Use of funds:</b> 6 months of runway for a solo founder + 1 part-time security engineer · 10 paid mainnet integrations · spec PR landed at x402-foundation/x402 · path to $30K MRR.</p>
+  <p class="sub"><b>Use of funds:</b> 6 months runway · 1 part-time security engineer · ship v1.0 mainnet · 10 paid integrations · spec PR landed at x402-foundation/x402. <b>The bet:</b> the same builder who put x402guard at #1 on aGDP can put AgentFirewall on every agent shipping payments.</p>
 
   <div class="askgrid">
     <div class="asks">
@@ -651,16 +654,16 @@
   <p>If no live: walk the terminal output, then the QUOTE_LIE box. "The signature proves the lie."</p>
 </template>
 <template id="notes-template-traction">
-  <p><b>Honesty wins.</b> "We're at week zero. Here's what we have, here's what we don't." Investors discount fake traction harder than missing traction.</p>
-  <p>The pipeline of named builders is the leading indicator. Read 3-4 names by name.</p>
+  <p><b>Lead with the numbers.</b> "x402guard ranked #1 on aGDP.io Epoch 1 with $90.5K weekly revenue. The next epoch I shipped x402guard_pentester — ranked #2 with $66.6K. That's $157K in two weeks on the same x402-security wedge."</p>
+  <p>Then pivot: "AgentFirewall is the v0.1 productized version of that learning — same wedge, but as infra anyone can use, not a single agent earning fees."</p>
 </template>
 <template id="notes-template-biz">
   <p><b>No token. Repeat: no token.</b> This kills 80% of crypto pitch objections in one sentence.</p>
   <p>The math line: $19 ARPU · 80% margin · 3-month payback. Tight, defensible, SaaS — not crypto-economic theater.</p>
 </template>
 <template id="notes-template-team">
-  <p><b>Founder-problem fit is the killer line.</b> "I gave my own agent a wallet, watched it drain, got mad, built the fix that same day."</p>
-  <p>If asked about being solo: "shipping the working MVP and pitch deck same-day is the answer." Then change subject to design partners.</p>
+  <p><b>Open with the receipts:</b> "x402guard — #1 on aGDP Epoch 1, #2 on Epoch 2. zx402 — featured by Virtuals. moonstack — live launch with $183K accumulated."</p>
+  <p>Then the line: "Same builder, same wedge, three working products. AgentFirewall is the productized policy layer on top of a stack already earning real money."</p>
 </template>
 <template id="notes-template-ask">
   <p><b>Specific ask, specific use.</b> "$250K SAFE at $5M cap, MFN. 6 months runway. 100 paid agents. Spec PR landed."</p>
